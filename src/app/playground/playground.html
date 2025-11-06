@@ -1,0 +1,52 @@
+<div class="p-10 bg-sky-800 text-white mb-4">Playground</div>
+<div class="p-6 bg-sky-200">
+  <!-- <input
+    type="text"
+    class="ml-10 p-2 border border-slate-400 rounded-lg focus:outline-none focus:border-indigo-500"
+    placeholder="Type something..."
+  /> -->
+
+  <!-- component.html -->
+  <!-- <input
+    type="text"
+    [(ngModel)]="inputValue"
+    class="ml-10 p-2 border border-slate-400 rounded-lg focus:outline-none focus:border-indigo-500"
+  />
+  <p>Current Value: {{ inputValue }}</p> -->
+  <div>
+    <p>Set Start: {{ inputNumber }}</p>
+    <input
+      type="number"
+      [(ngModel)]="inputNumber"
+      (ngModelChange)="onValueChange($event)"
+      class="ml-10 p-2 border border-slate-400 rounded-lg focus:outline-none focus:border-indigo-500"
+    />
+    <!-- <p>Start Number: {{ inputNumber }}</p> -->
+  </div>
+  <button
+    class="w-40 text-center ml-10 mt-5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow"
+    (click)="onSetStart()"
+  >
+    Start Loop
+  </button>
+
+  <mat-slider min="0" max="100000" step="1000" showTickMarks discrete [displayWith]="formatLabel">
+    <input matSliderThumb [value]="sliderValue()" (valueChange)="onSliderChange($event)" />
+  </mat-slider>
+
+  <!-- Add this to see the slider value -->
+  <p class="mt-4">Slider Value: {{ sliderValue() }}</p>
+</div>
+
+<div class="w-full">
+  <!-- {{ counter() }} -->
+</div>
+
+<p>Current Counter: {{ inputSignal() }}</p>
+
+<button
+  class="w-20 text-center ml-10 mt-5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow"
+  (click)="onButtonClick()"
+>
+  {{ counter() }}
+</button>
