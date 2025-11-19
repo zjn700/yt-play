@@ -37,10 +37,11 @@ export class Playground {
   inputNumber: number = 0;
   inputSignal = signal(this.inputNumber);
   sliderValue = signal(0); // Add this signal for the slider
+  // sliderVal = 0;
   // @ViewChild('myPlayer', { static: false }) iframe: ElementRef | undefined;
   videoTitle = '';
   videoCurrentTime: number = 0;
-
+  player: any = null;
   selectedOption = '5 seconds';
   lengthOption = 0.1;
 
@@ -118,6 +119,7 @@ export class Playground {
         return;
       }
       // get video title
+      this.player = player;
       this.videoTitle = player.getVideoData().title || '';
       this.videoCurrentTime = player.getCurrentTime() || 0;
 
@@ -146,25 +148,32 @@ export class Playground {
   }
   onPlayerStateChange(event: any) {
     console.log('Player State Changed:', event.data);
+    // this.videoCurrentTime = event.target.getCurrentTime() || 0;
   }
 
   onValueChange(value: number) {
     console.log('Input value changed:', value);
     this.inputNumber = value;
     this.inputSignal.set(value);
-    this.sliderValue.set(value * 1000); // Convert to match slider scale
+    this.sliderValue.set(value); // Convert to match slider scale
+    // this.sliderValue.set(value * 1000); // Convert to match slider scale
   }
 
   onSliderChange(event: any) {
     console.log('Slider value changed:', event);
     this.sliderValue.set(event.value);
-    this.inputNumber = event / 1000;
-    this.inputSignal.set(event / 1000);
+    this.inputNumber = event;
+    this.inputNumber = event;
+    this.player.seekTo(this.inputNumber, true);
+
+    // this.inputSignal.set(event / 1000);
+    // this.inputSignal.set(event / 1000);
   }
 
   formatLabel(value: number): string {
     if (value >= 1000) {
-      return Math.round(value / 1000) + 'k';
+      return (value / 1000).toFixed(1) + 'k';
+      // return Math.round(value / 10) + 'k';
     }
     console.log('val===', `${value}`);
     return `${value}`;

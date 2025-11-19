@@ -8,6 +8,10 @@
   border: none; /* Clean up default borders */
 }
 
+#zuul {
+  width: 100%;
+  display: block;
+}
 /* .card-title {
   font-size: 1.75rem;
   font-weight: bold;
@@ -17,10 +21,10 @@
   padding: 1rem;
   width: 100%;
 } */
-
+/* 
 #player {
   margin: 0 auto;
   display: block;
   width: auto;
   height: auto;
-}
+} */

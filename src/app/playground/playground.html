@@ -22,10 +22,10 @@
   <div class="max-w-xl mx-auto">
     <app-youtube-embed
       #myPlayer
-      class="video-wrapper"
       [videoId]="youtubeId"
       [playbackOption]="selectedOption"
       [jumpLength]="lengthOption"
+      [seekTo]="inputNumber"
       (ready)="onPlayerReady($event)"
       (stateChange)="onPlayerStateChange($event)"
       (focusRequest)="onFocusRequested()"
@@ -33,7 +33,20 @@
     ></app-youtube-embed>
   </div>
 
-  <div class="p-6 bg-sky-800">
+  <mat-slider
+    id="zuul"
+    class="block w-full"
+    min="0"
+    max="{{ videoDuration }}"
+    step="1"
+    showTickMarks
+    discrete
+    [displayWith]="formatLabel"
+  >
+    <input matSliderThumb [value]="sliderValue()" (valueChange)="onSliderChange($event)" />
+  </mat-slider>
+  <div>{{ inputNumber }}</div>
+  <div class="p-6 bg-sky-100">
     <div #parentContainer tabindex="-1" (focus)="onParentFocus()">
       <!-- <h3>Parent Component</h3> -->
     </div>
@@ -143,7 +156,15 @@
       Start Loop
     </button>
 
-    <mat-slider min="0" max="100000" step="1000" showTickMarks discrete [displayWith]="formatLabel">
+    <!-- <mat-slider min="0" max="100000" step="1000" showTickMarks discrete [displayWith]="formatLabel"> -->
+    <mat-slider
+      min="0"
+      max="{{ videoDuration }}"
+      step="1"
+      showTickMarks
+      discrete
+      [displayWith]="formatLabel"
+    >
       <input matSliderThumb [value]="sliderValue()" (valueChange)="onSliderChange($event)" />
     </mat-slider>
 

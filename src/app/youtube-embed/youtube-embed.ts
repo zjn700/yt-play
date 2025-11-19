@@ -14,8 +14,10 @@ export class YoutubeEmbed {
   @Input() videoId = '';
   @Input() params = 'rel=0&modestbranding=1&enablejsapi=1';
   url?: SafeResourceUrl;
+  // delete the next input playbackoption
   @Input() playbackOption: 'default' | 'high' | 'low' | string = 'default';
   @Input() jumpLength: 5 | 10 | 25 | number = 10;
+  @Input() seekTo: number | null = null;
   // ready = signal(false);
   // stateChange = signal(false);
   @Output() ready = new EventEmitter<any>();
@@ -30,8 +32,8 @@ export class YoutubeEmbed {
   currentTime = 0;
   startSec = 5;
   private updateInterval: number | null = null;
-  height = 400;
-  width = this.height * (16 / 9);
+  // height = 400;
+  // width = this.height * (16 / 9);
 
   constructor(private sanitizer: DomSanitizer) {}
 
@@ -161,6 +163,7 @@ export class YoutubeEmbed {
           this.ready.emit(e);
         },
         onStateChange: () => {
+          this.currentTime = this.seekTo || 0;
           /* no-op here */
         },
       },
