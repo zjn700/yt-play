@@ -30,7 +30,7 @@ export class Playground {
   // @ViewChild(YoutubeEmbed) youtubePlayer!: YoutubeEmbed;
   @ViewChild('parentContainer')
   parentElement!: ElementRef<HTMLDivElement>;
-  youtubeId = 'FwmAxDejyNo'; //'dQw4w9WgXcQ'; // example id or bind to a signal/property
+  youtubeId = '8h7rriQD1qc'; //'FwmAxDejyNo'; //'dQw4w9WgXcQ'; // example id or bind to a signal/property
   videoDuration: number | null = null; // Store video duration
   counter = signal(0);
   inputValue: string = '';
@@ -44,8 +44,90 @@ export class Playground {
   player: any = null;
   selectedOption = '5 seconds';
   lengthOption = 0.1;
+  jumpLength = 1;
+
+  duration = 0;
+  currentTime = 0;
+  private updateInterval: number | null = null;
+  // output signals
+  parentMessage = signal<string>('Awaiting message...');
+  newTime = signal<number>(0);
+  evKey = signal<KeyboardEvent | null>(null);
+
+  // handling child events
+  handleChildMessage(message: string): void {
+    console.log('handleChildMessage message=', message);
+    this.parentMessage.set(message);
+    console.log('Parent received this value:', message);
+  }
+  handleUpdatedTime(time: number): void {
+    console.log('handleUpdatedTime time=', time);
+    this.newTime.set(time);
+    console.log('Parent received updated time:', time);
+  }
+  handleKeydownEvent(event: KeyboardEvent): void {
+    console.log('handleKeydownEvent event=', event);
+    this.evKey.set(event);
+
+    if (event.key.toLowerCase() === 'h') {
+      console.log('H key pressed - toggling play/pause');
+      this.togglePlayPause();
+      // this.seekBy(this.jumpLength);
+    }
+    if (event.key === 'ArrowRight') {
+      console.log('right arrow key pressed -');
+      // this.togglePlayPause();
+      this.seekBy(this.jumpLength);
+    }
+    console.log('Parent received keydown event:', event);
+  }
+
+  private togglePlayPause() {
+    if (!this.player) return;
+    try {
+      const state = this.player.getPlayerState();
+      // YT.PlayerState.PLAYING === 1
+      if (state === 1) {
+        this.player.pauseVideo();
+      } else {
+        this.player.playVideo();
+      }
+    } catch {
+      // fallback: call playVideo
+      this.player.playVideo?.();
+    }
+    this.newTime.set(this.player.getCurrentTime());
+    this.sliderValue.set(this.newTime());
+  }
+
+  private seekBy(delta: number) {
+    if (!this.player || typeof this.player.getCurrentTime !== 'function') return;
+    const now = this.player.getCurrentTime();
+    const newTime = Math.max(0, Math.min(this.duration || 0, now + delta));
+    this.player.seekTo(newTime, true);
+    this.currentTime = newTime;
+    this.player.pauseVideo();
+    // ÷this.updatedTime.emit(this.player.getCurrentTime());
+  }
+
+  private startUpdating() {
+    // this.stopUpdating();
+    this.updateInterval = window.setInterval(() => {
+      if (this.player?.getCurrentTime) {
+        this.currentTime = this.player.getCurrentTime();
+      }
+      // refresh duration if available later
+      if (this.player?.getDuration) {
+        const d = this.player.getDuration();
+        if (d && d !== this.duration) this.duration = d;
+      }
+    }, 150);
+  }
+
+  //////// end handling child events
 
   constructor() {
+    console.log('playground constructor', this.parentMessage());
     this.inputSignal.set(this.inputNumber);
     effect(() => {
       this.inputSignal.update((value) => value + this.inputNumber);
@@ -106,6 +188,7 @@ export class Playground {
   }
   onPlayerReady(event: any) {
     console.log('Player Ready:', event);
+    this.startUpdating();
 
     // Get the duration when the player is ready.
     // The YouTube Player API exposes getDuration() on the player instance (event.target).
@@ -148,6 +231,8 @@ export class Playground {
   }
   onPlayerStateChange(event: any) {
     console.log('Player State Changed:', event.data);
+    this.newTime.set(this.inputNumber);
+
     // this.videoCurrentTime = event.target.getCurrentTime() || 0;
   }
 
@@ -156,6 +241,11 @@ export class Playground {
     this.inputNumber = value;
     this.inputSignal.set(value);
     this.sliderValue.set(value); // Convert to match slider scale
+    this.player.pauseVideo();
+    this.player.seekTo(this.inputNumber, true);
+    this.newTime.set(this.inputNumber);
+    this.sliderValue.set(this.newTime()); // Convert to match slider scale
+
     // this.sliderValue.set(value * 1000); // Convert to match slider scale
   }
 
@@ -165,6 +255,7 @@ export class Playground {
     this.inputNumber = event;
     this.inputNumber = event;
     this.player.seekTo(this.inputNumber, true);
+    this.newTime.set(this.inputNumber);
 
     // this.inputSignal.set(event / 1000);
     // this.inputSignal.set(event / 1000);
@@ -181,6 +272,8 @@ export class Playground {
 
   onSetStart() {
     this.counter.update((count) => this.inputNumber);
+    this.newTime.set(this.inputNumber);
+
     // console.log('zuul', this.youtubePlayer);
 
     // alert('Button clicked!');

@@ -1,5 +1,5 @@
 // import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, output, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // needed for keyboard events
@@ -27,6 +27,10 @@ export class YoutubeEmbed {
 
   @Output() focusRequest = new EventEmitter<void>();
 
+  messageEvent = output<string>();
+  updatedTime = output<number>();
+  evKeydown = output<KeyboardEvent>();
+
   player: any = null;
   duration = 0;
   currentTime = 0;
@@ -42,6 +46,24 @@ export class YoutubeEmbed {
     window.addEventListener('keydown', this.onKeyDown as any);
     this.requestParentFocus();
   }
+  sendMessage(): void {
+    const valueToSend = 'Hello from the Child component!';
+    console.log('Child: Sending message to parent:', valueToSend);
+    // 1. Emit the value. This fires the custom event.
+    this.messageEvent.emit(valueToSend);
+  }
+  sendUpdatedTime(time: number): void {
+    console.log('Child: Sending updated time to parent:', time);
+    // 1. Emit the value. This fires the custom event.
+    this.updatedTime.emit(time);
+  }
+
+  sendKeydownEvent(event: KeyboardEvent): void {
+    console.log('Child: Sending keydown event to parent:', event);
+    // 1. Emit the value. This fires the custom event.
+    this.evKeydown.emit(event);
+  }
+
   requestParentFocus() {
     console.log('Child: Emitting focus request...');
     this.focusRequest.emit();
@@ -57,6 +79,7 @@ export class YoutubeEmbed {
   private onKeyDown = (ev: KeyboardEvent) => {
     // ignore when typing in input fields
     const target = ev.target as HTMLElement | null;
+    this.sendKeydownEvent(ev);
     if (target?.tagName === 'INPUT') {
       return;
     }
@@ -81,6 +104,20 @@ export class YoutubeEmbed {
       // console.log('toggled loop', this.isLooping);
       return;
     }
+    if (ev.key.toLowerCase() === 'm') {
+      console.log('M key pressed for loop toggle');
+      this.togglePlayPause();
+      this.sendMessage();
+      this.sendUpdatedTime(this.player.getCurrentTime());
+      this.player.getCurrentTime(); // Get the current time
+      // this.updatedTime.emit(this.player.getCurrentTime());
+
+      // console.log('toggling loop', this.isLooping);
+      // if (this.isLooping) this.stopLoop();
+      // else this.startLoop();
+      // console.log('toggled loop', this.isLooping);
+      return;
+    }
     switch (ev.key) {
       case ' ': {
         //space
@@ -88,15 +125,18 @@ export class YoutubeEmbed {
         console.log('Space');
         ev.preventDefault();
         this.togglePlayPause();
+        this.updatedTime.emit(this.player.getCurrentTime());
 
         break;
       }
-      case 'ArrowRight': {
+      case 'ArrowRightxxx': {
         // Forward
         // this.postMessage('nextVideo');
         console.log('ArrowRight', this.jumpLength);
         this.player.pauseVideo();
         this.seekBy(this.jumpLength);
+        // this.updatedTime.emit(this.player.getCurrentTime());
+
         // ev.preventDefault();
         break;
       }
@@ -105,6 +145,8 @@ export class YoutubeEmbed {
         // this.postMessage('prevVideo');
         console.log('ArrowLeft', -this.jumpLength);
         this.seekBy(-this.jumpLength);
+        // this.updatedTime.emit(this.player.getCurrentTime());
+
         // ev.preventDefault();
         break;
       }
@@ -117,6 +159,7 @@ export class YoutubeEmbed {
     const newTime = Math.max(0, Math.min(this.duration || 0, now + delta));
     this.player.seekTo(newTime, true);
     this.currentTime = newTime;
+    this.updatedTime.emit(this.player.getCurrentTime());
   }
 
   private loadYouTubeIframeApi() {
@@ -164,6 +207,7 @@ export class YoutubeEmbed {
         },
         onStateChange: () => {
           this.currentTime = this.seekTo || 0;
+
           /* no-op here */
         },
       },
