@@ -42,7 +42,7 @@
     class="block w-full"
     min="0"
     max="{{ videoDuration }}"
-    step="1"
+    step="0.1"
     showTickMarks
     discrete
     [displayWith]="formatLabel"
@@ -161,16 +161,16 @@
     </button>
 
     <!-- <mat-slider min="0" max="100000" step="1000" showTickMarks discrete [displayWith]="formatLabel"> -->
-    <mat-slider
+    <!-- <mat-slider
       min="0"
       max="{{ videoDuration }}"
-      step="1"
+      step="0.1"
       showTickMarks
       discrete
       [displayWith]="formatLabel"
     >
       <input matSliderThumb [value]="sliderValue()" (valueChange)="onSliderChange($event)" />
-    </mat-slider>
+    </mat-slider> -->
 
     <!-- Add this to see the slider value -->
     <p class="mt-4">Slider Value: {{ sliderValue() }}</p>

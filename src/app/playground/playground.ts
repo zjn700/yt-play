@@ -44,7 +44,7 @@ export class Playground {
   player: any = null;
   selectedOption = '5 seconds';
   lengthOption = 0.1;
-  jumpLength = 1;
+  jumpLength = 0.1;
 
   duration = 0;
   currentTime = 0;
@@ -69,15 +69,27 @@ export class Playground {
     console.log('handleKeydownEvent event=', event);
     this.evKey.set(event);
 
-    if (event.key.toLowerCase() === 'h') {
-      console.log('H key pressed - toggling play/pause');
+    if (event.key.toLowerCase() === 'n') {
+      console.log('N key pressed - toggling play/pause');
+      event.preventDefault();
+      // this.player.pauseVideo();
       this.togglePlayPause();
-      // this.seekBy(this.jumpLength);
+      this.newTime.set(this.currentTime);
+      this.sliderValue.set(this.newTime());
     }
     if (event.key === 'ArrowRight') {
       console.log('right arrow key pressed -');
       // this.togglePlayPause();
       this.seekBy(this.jumpLength);
+      this.newTime.set(this.player.getCurrentTime() + this.jumpLength);
+      this.sliderValue.set(this.newTime());
+    }
+    if (event.key === 'ArrowLeft') {
+      console.log('right arrow key pressed -');
+      // this.togglePlayPause();
+      this.seekBy(-this.jumpLength);
+      this.newTime.set(this.player.getCurrentTime() - this.jumpLength);
+      this.sliderValue.set(this.newTime());
     }
     console.log('Parent received keydown event:', event);
   }
@@ -98,6 +110,7 @@ export class Playground {
     }
     this.newTime.set(this.player.getCurrentTime());
     this.sliderValue.set(this.newTime());
+    console.log('Toggled play/pause, current time:', this.player.getCurrentTime());
   }
 
   private seekBy(delta: number) {
@@ -253,7 +266,8 @@ export class Playground {
     console.log('Slider value changed:', event);
     this.sliderValue.set(event.value);
     this.inputNumber = event;
-    this.inputNumber = event;
+    console.log('onSliderChange inputNumber=', this.inputNumber);
+    // this.inputNumber = event;
     this.player.seekTo(this.inputNumber, true);
     this.newTime.set(this.inputNumber);
 
@@ -262,12 +276,15 @@ export class Playground {
   }
 
   formatLabel(value: number): string {
+    console.log('formatLabel value=', value);
     if (value >= 1000) {
       return (value / 1000).toFixed(1) + 'k';
       // return Math.round(value / 10) + 'k';
     }
-    console.log('val===', `${value}`);
-    return `${value}`;
+    console.log('val===formatLabel', `${value}`);
+
+    return value.toFixed(1).toString();
+    // return `${value}`;
   }
 
   onSetStart() {

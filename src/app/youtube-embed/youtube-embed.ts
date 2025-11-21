@@ -140,7 +140,7 @@ export class YoutubeEmbed {
         // ev.preventDefault();
         break;
       }
-      case 'ArrowLeft': {
+      case 'ArrowLeftxxx': {
         // Backward
         // this.postMessage('prevVideo');
         console.log('ArrowLeft', -this.jumpLength);
