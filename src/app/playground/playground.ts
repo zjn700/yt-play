@@ -66,7 +66,7 @@ export class Playground {
     console.log('Parent received updated time:', time);
   }
   handleKeydownEvent(event: KeyboardEvent): void {
-    console.log('handleKeydownEvent event=', event);
+    // console.log('handleKeydownEvent event=', event);
     this.evKey.set(event);
 
     if (event.key.toLowerCase() === 'n') {
@@ -74,22 +74,42 @@ export class Playground {
       event.preventDefault();
       // this.player.pauseVideo();
       this.togglePlayPause();
-      this.newTime.set(this.currentTime);
-      this.sliderValue.set(this.newTime());
+      // this.newTime.set(this.currentTime);
+      // this.sliderValue.set(this.newTime());
     }
     if (event.key === 'ArrowRight') {
       console.log('right arrow key pressed -');
-      // this.togglePlayPause();
-      this.seekBy(this.jumpLength);
-      this.newTime.set(this.player.getCurrentTime() + this.jumpLength);
-      this.sliderValue.set(this.newTime());
+      event.preventDefault();
+      this.currentTime = this.player.getCurrentTime();
+      // console.log('seeking up to ', this.player.getCurrentTime() + this.jumpLength);
+      // this.seekBy(this.player.getCurrentTime() + this.jumpLength);
+      this.inputNumber = this.inputNumber + this.jumpLength;
+      console.log('on right arrow key inputNumber=', this.inputNumber);
+      this.onValueChange(this.inputNumber);
+
+      // this.seekBy(this.jumpLength);
+
+      // this.newTime.set(this.player.getCurrentTime());
+      // this.newTime.set(this.player.getCurrentTime() + this.jumpLength);
+      // this.sliderValue.set(this.newTime());
     }
     if (event.key === 'ArrowLeft') {
-      console.log('right arrow key pressed -');
+      event.preventDefault();
+
+      console.log('left arrow key pressed -');
+      // this.player.pauseVideo();
       // this.togglePlayPause();
-      this.seekBy(-this.jumpLength);
-      this.newTime.set(this.player.getCurrentTime() - this.jumpLength);
-      this.sliderValue.set(this.newTime());
+      // console.log('seeking back to ', this.player.getCurrentTime() - this.jumpLength);
+      // this.seekBy(-this.jumpLength);
+      this.inputNumber = this.inputNumber - this.jumpLength;
+      console.log('on left arrow key inputNumber=', this.inputNumber);
+      this.onValueChange(this.inputNumber);
+      // this.inputNumber = this.player.getCurrentTime() - this.jumpLength;
+      // this.seekBy(this.player.getCurrentTime() - this.jumpLength);
+      // this.newTime.set(this.player.getCurrentTime());
+
+      // this.newTime.set(this.player.getCurrentTime() - this.jumpLength);
+      // this.sliderValue.set(this.newTime());
     }
     console.log('Parent received keydown event:', event);
   }
@@ -101,6 +121,10 @@ export class Playground {
       // YT.PlayerState.PLAYING === 1
       if (state === 1) {
         this.player.pauseVideo();
+        this.currentTime = this.player.getCurrentTime();
+        this.onValueChange(this.currentTime);
+        // this.player.getCurrentTime();
+        // this.sliderValue.set(this.newTime());
       } else {
         this.player.playVideo();
       }
@@ -108,18 +132,40 @@ export class Playground {
       // fallback: call playVideo
       this.player.playVideo?.();
     }
-    this.newTime.set(this.player.getCurrentTime());
-    this.sliderValue.set(this.newTime());
-    console.log('Toggled play/pause, current time:', this.player.getCurrentTime());
+    // this.newTime.set(this.player.getCurrentTime());
+
+    console.log(
+      'Toggled play/pause, current time:',
+      this.player.getCurrentTime(),
+      this.sliderValue()
+    );
   }
 
   private seekBy(delta: number) {
-    if (!this.player || typeof this.player.getCurrentTime !== 'function') return;
+    // if (!this.player || typeof this.player.getCurrentTime !== 'function') return;
     const now = this.player.getCurrentTime();
-    const newTime = Math.max(0, Math.min(this.duration || 0, now + delta));
-    this.player.seekTo(newTime, true);
-    this.currentTime = newTime;
-    this.player.pauseVideo();
+    console.log('Seeking ', delta, 'seconds', 'from', now, 'currentTime=', this.currentTime);
+    // this.player.seekTo(now + delta, true);
+    console.log('before update  ', this.player.getCurrentTime() + delta);
+    this.player.seekTo(this.player.getCurrentTime() + delta, true);
+    console.log('after update  ', this.player.getCurrentTime() + delta);
+    // this.player.playVideo();
+    // this.player.pauseVideo();
+    console.log('Moved to ', this.player.getCurrentTime());
+
+    this.currentTime = this.player.getCurrentTime();
+    this.newTime.set(this.currentTime);
+    this.sliderValue.set(this.currentTime);
+    // this.newTime.set(this.player.getCurrentTime());
+    // this.sliderValue.set(this.newTime());
+    console.log('Moved to ', this.currentTime, this.player.getCurrentTime());
+    // this.player.pauseVideo();
+    // ÷this.updatedTime.emit(this.player.getCurrentTime());
+    // const now = this.player.getCurrentTime();
+    // const newTime = Math.max(0, Math.min(this.duration || 0, now + delta));
+    // this.player.seekTo(newTime, true);
+    // this.currentTime = newTime;
+    // this.player.pauseVideo();
     // ÷this.updatedTime.emit(this.player.getCurrentTime());
   }
 
@@ -250,7 +296,7 @@ export class Playground {
   }
 
   onValueChange(value: number) {
-    console.log('Input value changed:', value);
+    console.log('cccc Input value changed:', value);
     this.inputNumber = value;
     this.inputSignal.set(value);
     this.sliderValue.set(value); // Convert to match slider scale
@@ -276,7 +322,7 @@ export class Playground {
   }
 
   formatLabel(value: number): string {
-    console.log('formatLabel value=', value);
+    console.log('formatLabel value=', value, ' newtime=', this.inputNumber);
     if (value >= 1000) {
       return (value / 1000).toFixed(1) + 'k';
       // return Math.round(value / 10) + 'k';

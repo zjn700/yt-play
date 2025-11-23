@@ -147,7 +147,7 @@ export class YoutubeEmbed {
         this.seekBy(-this.jumpLength);
         // this.updatedTime.emit(this.player.getCurrentTime());
 
-        // ev.preventDefault();
+        // ev.preventDefault()
         break;
       }
     }
